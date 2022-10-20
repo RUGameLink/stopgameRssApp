@@ -8,10 +8,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class HTTPDataHandler {
-    static String stream = null;
 
     public HTTPDataHandler() {
+
     }
+
+    static String stream = null;
 
     public String GetHTTPData(String urlString){
         try {
@@ -35,5 +37,6 @@ public class HTTPDataHandler {
         catch (Exception ex){
 
         }
+        return stream;
     }
 }
