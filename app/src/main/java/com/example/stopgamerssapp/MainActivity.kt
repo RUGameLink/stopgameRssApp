@@ -131,6 +131,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             loadRSS(stringBuilder)
             true
         }
+        R.id.menu_logo -> {
+            val url = "https://stopgame.ru/"
+            val i = Intent(Intent.ACTION_VIEW)
+            i.data = Uri.parse(url)
+            startActivity(i)
+            true
+        }
 
         else -> {
             super.onOptionsItemSelected(item)
