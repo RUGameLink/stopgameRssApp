@@ -43,6 +43,20 @@ class FeedViewHolder extends RecyclerView.ViewHolder {
                 }
             }
         });
+
+        itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if(itemClickListener != null){
+                    int position = getAdapterPosition();
+
+                    if(position != RecyclerView.NO_POSITION){
+                        itemClickListener.itemOnLongClick(position);
+                    }
+                }
+                return true;
+            }
+        });
     }
 }
 

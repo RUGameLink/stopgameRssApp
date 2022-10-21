@@ -108,6 +108,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         startActivity(i)
     }
 
+    override fun itemOnLongClick(position: Int) {
+        val intent= Intent()
+        intent.action=Intent.ACTION_SEND
+        intent.putExtra(Intent.EXTRA_TEXT,"${newsList[position].link}")
+        intent.type="text/plain"
+        startActivity(Intent.createChooser(intent,"Share To:"))
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean { //Подключаем меню к action bar
         val inflater = menuInflater
         inflater.inflate(R.menu.main_menu, menu)
