@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     private fun loadRSS(link: StringBuilder) {
         try {
+            newsList.clear()
             val thread = Thread  {
                 var result: String
                 var httpDataHandler = HTTPDataHandler()
