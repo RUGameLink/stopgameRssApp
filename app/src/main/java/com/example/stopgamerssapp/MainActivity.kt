@@ -1,14 +1,20 @@
 package com.example.stopgamerssapp
 
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import android.widget.Toolbar
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.stopgamerssapp.Adapter.FeedAdapter
@@ -21,32 +27,28 @@ import java.lang.Exception
 import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity(), ItemClickListener {
-    /*
-    result получает нормальный json файл
-    Можно подготовить data class под парсинг, спарсить по классике result, напихать в data класс
-    Пересобрать ресайклер под дату и на котлине - и все
-     */
-  //  private lateinit var toolbar: Toolbar
+
     private val newsList = ArrayList<StopGameNews>()
 
     private val RSS_LINK: String = "https://rss.stopgame.ru/rss_all.xml"
     private val RSS_TO_JSON_API: String = "https://api.rss2json.com/v1/api.json?rss_url="
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        init()
-
-            //    toolbar.title = "StopGame НОВОСТИ"
-    //    setSupportActionBar(toolbar)
-
         var stringBuilder = StringBuilder(RSS_TO_JSON_API)
         stringBuilder.append(RSS_LINK)
         println("StingBuilder $stringBuilder")
-        loadRSS(stringBuilder)
 
-        // setAdapter()
+        if(isOnline(this)){
+            loadRSS(stringBuilder)
+        }
+        else{
+            Toast.makeText(this, "Отсутствует подключение к сети", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     private fun setAdapter(newsList: ArrayList<StopGameNews>) {
@@ -122,13 +124,20 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         return super.onCreateOptionsMenu(menu)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) { //Слушаем нажатие на кнопку по id
         R.id.menu_refresh -> {
             Toast.makeText(this, "Обновляю данные...", Toast.LENGTH_SHORT).show()
             var stringBuilder = StringBuilder(RSS_TO_JSON_API)
             stringBuilder.append(RSS_LINK)
             println("StingBuilder $stringBuilder")
-            loadRSS(stringBuilder)
+
+            if(isOnline(this)){
+                loadRSS(stringBuilder)
+            }
+            else{
+                Toast.makeText(this, "Отсутствует подключение к сети", Toast.LENGTH_SHORT).show()
+            }
             true
         }
         R.id.menu_logo -> {
@@ -144,7 +153,26 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         }
     }
 
-    private fun init() {
-      //  toolbar = findViewById(R.id.toolbar)
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun isOnline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (connectivityManager != null) {
+            val capabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            if (capabilities != null) {
+                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                    return true
+                }
+            }
+        }
+        return false
     }
 }
