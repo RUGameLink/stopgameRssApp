@@ -1,29 +1,20 @@
 package com.example.stopgamerssapp
 
-import android.app.ProgressDialog
-import android.content.AsyncTaskLoader
-import android.content.Context
-import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import android.widget.Toolbar
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.stopgamerssapp.Adapter.FeedAdapter
 import com.example.stopgamerssapp.Common.HTTPDataHandler
-import com.example.stopgamerssapp.Model.RSSObject
-import com.google.gson.Gson
-import java.io.IOException
-import java.io.InputStream
+import com.example.stopgamerssapp.Model.StopGameNews
+import org.json.JSONObject
+import org.json.JSONTokener
 import java.lang.Exception
 import java.lang.StringBuilder
-import java.net.URL
-import java.net.URLConnection
-import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
     /*
@@ -32,7 +23,6 @@ class MainActivity : AppCompatActivity() {
     Пересобрать ресайклер под дату и на котлине - и все
      */
     private lateinit var toolbar: Toolbar
-    private var rssObject: RSSObject? = null
 
     private val RSS_LINK: String = "https://rss.stopgame.ru/rss_all.xml"
     private val RSS_TO_JSON_API: String = "https://api.rss2json.com/v1/api.json?rss_url="
@@ -46,30 +36,57 @@ class MainActivity : AppCompatActivity() {
         toolbar.title = "StopGame НОВОСТИ"
         setActionBar(toolbar)
 
-        setAdapter()
-    }
-
-    private fun setAdapter() {
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-        val linearLayoutManager = LinearLayoutManager(applicationContext)
-        linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
-        recyclerView.layoutManager = linearLayoutManager
         var stringBuilder = StringBuilder(RSS_TO_JSON_API)
         stringBuilder.append(RSS_LINK)
         println("StingBuilder $stringBuilder")
         loadRSS(stringBuilder)
-        println("rssTest $rssObject")
-    //    recyclerView.adapter = FeedAdapter(rssObject, this)
+
+        // setAdapter()
+    }
+
+    private fun setAdapter(newsList: ArrayList<StopGameNews>) {
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+        val linearLayoutManager = LinearLayoutManager(applicationContext)
+        linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
+        recyclerView.layoutManager = linearLayoutManager
+        recyclerView.adapter = FeedAdapter(newsList, this)
     }
 
     private fun loadRSS(link: StringBuilder) {
+        val newsList = ArrayList<StopGameNews>()
         try {
             val thread = Thread  {
                 var result: String
                 var httpDataHandler = HTTPDataHandler()
                 result = httpDataHandler.GetHTTPData(link.toString())
-                println("resultTest $result")
-                rssObject = Gson().fromJson(result, RSSObject::class.java)
+                val jsonObject = JSONTokener(result).nextValue() as JSONObject
+                var error = jsonObject.optString("status")
+                val jsonArray = jsonObject.getJSONArray("items")
+                if(error.equals("ok")){
+                    println("resultTest $result")
+                    println("jsonArray $jsonArray")
+                    runOnUiThread {
+                        for (i in 0 until jsonArray.length()) {
+                            val title = jsonArray.getJSONObject(i).getString("title")
+                            val pubDate = jsonArray.getJSONObject(i).getString("pubDate")
+                            val link = jsonArray.getJSONObject(i).getString("link")
+                            val content = jsonArray.getJSONObject(i).getString("content")
+                            val enclosure = jsonArray.getJSONObject(i).getJSONObject("enclosure").getString("link")
+
+                            println("link: $enclosure")
+
+                            newsList.add(StopGameNews(title, content, pubDate, enclosure, link))
+                        }
+                        setAdapter(newsList)
+                    }
+                }
+                else{
+                    runOnUiThread {
+                        Toast.makeText(this, "error", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+            //    rssObject = Gson().fromJson(result, RSSObject::class.java)
             }
             thread.start()
         }
@@ -89,7 +106,10 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) { //Слушаем нажатие на кнопку по id
         R.id.menu_refresh -> {
             Toast.makeText(this, "Обновляю данные...", Toast.LENGTH_SHORT).show()
-            setAdapter()
+            var stringBuilder = StringBuilder(RSS_TO_JSON_API)
+            stringBuilder.append(RSS_LINK)
+            println("StingBuilder $stringBuilder")
+            loadRSS(stringBuilder)
             true
         }
 

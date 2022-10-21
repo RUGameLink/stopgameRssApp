@@ -11,10 +11,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.stopgamerssapp.Interface.ItemClickListener;
-import com.example.stopgamerssapp.Model.Feed;
-import com.example.stopgamerssapp.Model.RSSObject;
+import com.example.stopgamerssapp.Model.StopGameNews;
 import com.example.stopgamerssapp.R;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 class FeedViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
     public TextView txtTitle;
@@ -52,12 +53,12 @@ class FeedViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
 }
 
 public class FeedAdapter extends RecyclerView.Adapter<FeedViewHolder>{
-    private RSSObject rssObject;
+    private ArrayList<StopGameNews> stopGameNews;
     private Context mContext;
     private LayoutInflater layoutInflater;
 
-    public FeedAdapter(RSSObject rssObject, Context mContext) {
-        this.rssObject = rssObject;
+    public FeedAdapter(ArrayList<StopGameNews> stopGameNews, Context mContext) {
+        this.stopGameNews = stopGameNews;
         this.mContext = mContext;
         layoutInflater = LayoutInflater.from(mContext);
     }
@@ -71,16 +72,16 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull FeedViewHolder holder, int position) {
-        holder.txtTitle.setText(rssObject.getItems().get(position).getTitle());
-        holder.txtPubDate.setText(rssObject.getItems().get(position).getPubDate());
-        holder.txtContent.setText(rssObject.getItems().get(position).getContent());
+        holder.txtTitle.setText(stopGameNews.get(position).getTitle());
+        holder.txtPubDate.setText(stopGameNews.get(position).getPubDate());
+        holder.txtContent.setText(stopGameNews.get(position).getContent());
 
-        String imgUrl = rssObject.getItems().get(position).getEnclosure().toString();
+        String imgUrl = stopGameNews.get(position).getImageURL();
         Picasso.get().load(imgUrl).into(holder.imgNews);
     }
 
     @Override
     public int getItemCount() {
-        return rssObject.items.size();
+        return stopGameNews.size();
     }
 }
