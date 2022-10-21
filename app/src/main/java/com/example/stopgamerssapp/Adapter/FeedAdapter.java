@@ -17,14 +17,13 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-class FeedViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
+class FeedViewHolder extends RecyclerView.ViewHolder {
     public TextView txtTitle;
     public TextView txtContent;
     public TextView txtPubDate;
     public ImageView imgNews;
-    private ItemClickListener itemClickListener;
 
-    public FeedViewHolder(@NonNull View itemView) {
+    public FeedViewHolder(@NonNull View itemView, ItemClickListener itemClickListener) {
         super(itemView);
 
         txtTitle = itemView.findViewById(R.id.txtTitle);
@@ -32,23 +31,18 @@ class FeedViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
         txtPubDate = itemView.findViewById(R.id.txtPubDate);
         imgNews = itemView.findViewById(R.id.imgNews);
 
-        itemView.setOnClickListener(this);
-        itemView.setOnLongClickListener(this);
-    }
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(itemClickListener != null){
+                    int position = getAdapterPosition();
 
-    public void setItemClickListener(ItemClickListener itemClickListener) {
-        this.itemClickListener = itemClickListener;
-    }
-
-    @Override
-    public void onClick(View v) {
-        itemClickListener.onClick(v, getAdapterPosition(), false);
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        itemClickListener.onClick(v, getAdapterPosition(), false);
-        return true;
+                    if(position != RecyclerView.NO_POSITION){
+                        itemClickListener.itemOnClick(position);
+                    }
+                }
+            }
+        });
     }
 }
 
@@ -56,18 +50,20 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedViewHolder>{
     private ArrayList<StopGameNews> stopGameNews;
     private Context mContext;
     private LayoutInflater layoutInflater;
+    private final ItemClickListener itemClickListener;
 
-    public FeedAdapter(ArrayList<StopGameNews> stopGameNews, Context mContext) {
+    public FeedAdapter(ArrayList<StopGameNews> stopGameNews, Context mContext, ItemClickListener itemClickListener) {
         this.stopGameNews = stopGameNews;
         this.mContext = mContext;
         layoutInflater = LayoutInflater.from(mContext);
+        this.itemClickListener = itemClickListener;
     }
 
     @NonNull
     @Override
     public FeedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View viewHolder = layoutInflater.inflate(R.layout.row, parent, false);
-        return new FeedViewHolder(viewHolder);
+        return new FeedViewHolder(viewHolder, itemClickListener);
     }
 
     @Override

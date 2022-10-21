@@ -1,28 +1,33 @@
 package com.example.stopgamerssapp
 
+import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import android.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.stopgamerssapp.Adapter.FeedAdapter
 import com.example.stopgamerssapp.Common.HTTPDataHandler
+import com.example.stopgamerssapp.Interface.ItemClickListener
 import com.example.stopgamerssapp.Model.StopGameNews
 import org.json.JSONObject
 import org.json.JSONTokener
 import java.lang.Exception
 import java.lang.StringBuilder
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ItemClickListener {
     /*
     result получает нормальный json файл
     Можно подготовить data class под парсинг, спарсить по классике result, напихать в data класс
     Пересобрать ресайклер под дату и на котлине - и все
      */
-    private lateinit var toolbar: Toolbar
+  //  private lateinit var toolbar: Toolbar
+    private val newsList = ArrayList<StopGameNews>()
 
     private val RSS_LINK: String = "https://rss.stopgame.ru/rss_all.xml"
     private val RSS_TO_JSON_API: String = "https://api.rss2json.com/v1/api.json?rss_url="
@@ -33,8 +38,8 @@ class MainActivity : AppCompatActivity() {
 
         init()
 
-        toolbar.title = "StopGame НОВОСТИ"
-        setActionBar(toolbar)
+            //    toolbar.title = "StopGame НОВОСТИ"
+    //    setSupportActionBar(toolbar)
 
         var stringBuilder = StringBuilder(RSS_TO_JSON_API)
         stringBuilder.append(RSS_LINK)
@@ -49,11 +54,10 @@ class MainActivity : AppCompatActivity() {
         val linearLayoutManager = LinearLayoutManager(applicationContext)
         linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
         recyclerView.layoutManager = linearLayoutManager
-        recyclerView.adapter = FeedAdapter(newsList, this)
+        recyclerView.adapter = FeedAdapter(newsList, this, this)
     }
 
     private fun loadRSS(link: StringBuilder) {
-        val newsList = ArrayList<StopGameNews>()
         try {
             val thread = Thread  {
                 var result: String
@@ -97,6 +101,13 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun itemOnClick(position: Int) {
+        val url = newsList[position].link
+        val i = Intent(Intent.ACTION_VIEW)
+        i.data = Uri.parse(url)
+        startActivity(i)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean { //Подключаем меню к action bar
         val inflater = menuInflater
         inflater.inflate(R.menu.main_menu, menu)
@@ -119,6 +130,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        toolbar = findViewById(R.id.toolbar)
+      //  toolbar = findViewById(R.id.toolbar)
     }
 }
