@@ -1,9 +1,8 @@
-package com.example.stopgamerssapp
+package com.example.stopgamerssapp.Controller
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -13,7 +12,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.webkit.*
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -24,6 +22,7 @@ import com.example.stopgamerssapp.Adapter.FeedAdapter
 import com.example.stopgamerssapp.Common.HTTPDataHandler
 import com.example.stopgamerssapp.Interface.ItemClickListener
 import com.example.stopgamerssapp.Model.StopGameNews
+import com.example.stopgamerssapp.R
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -109,63 +108,15 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun itemOnClick(position: Int) {
-//        val url = newsList[position].link
-//        val i = Intent(Intent.ACTION_VIEW)
-//        i.data = Uri.parse(url)
-//        startActivity(i)
-        val dialog = BottomSheetDialog(this)
+        try {
+            val i = Intent(this, WebActivity::class.java)
+            i.putExtra("linkData", newsList[position].link)
+            startActivity(i)
 
-
-        val view = layoutInflater.inflate(R.layout.layout_browser, null)
-
-        val closeBtn = view.findViewById<ImageButton>(R.id.closeBtn)
-
-        // on below line we are adding on click listener
-        // for our dismissing the dialog button.
-        closeBtn.setOnClickListener {
-            // on below line we are calling a dismiss
-            // method to close our dialog.
-            dialog.dismiss()
         }
-
-        val webView = view.findViewById<WebView>(R.id.browserView)
-        val url = newsList[position].link
-
-            webView.webViewClient = WebViewClient()
-            webView.webChromeClient = WebChromeClient()
-            // включаем поддержку JavaScript
-            webView.settings.javaScriptEnabled = true
-            // указываем страницу загрузки
-            //    webView.loadUrl("https://www.istu.edu/schedule/")
-            webView.loadUrl(url)
-
-            webView.webViewClient = object: WebViewClient(){
-
-                @RequiresApi(Build.VERSION_CODES.Q)
-                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                }
-
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    dialog.dismiss()
-                    super.onPageFinished(view, url)
-                }
-
-                override fun onReceivedError(
-                    view: WebView?,
-                    errorCode: Int,
-                    description: String?,
-                    failingUrl: String?
-                ) {
-                    Log.d("TAG", "Err: ")
-                }
-            }
-
-        dialog.setCancelable(false)
-
-        dialog.setContentView(view)
-
-        dialog.show()
+        catch(ex: Exception){
+            println("Ошибка ${ex}")
+        }
     }
 
     override fun itemOnLongClick(position: Int) {
