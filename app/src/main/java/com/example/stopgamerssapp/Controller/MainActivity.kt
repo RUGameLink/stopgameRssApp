@@ -102,8 +102,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         catch (ex: Exception){
             println(ex)
         }
-
-
     }
 
     @SuppressLint("SetJavaScriptEnabled")
